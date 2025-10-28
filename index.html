@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Splash! - Fun Kids Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .game-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .game-header {
+            background: linear-gradient(to right, #FF9A8B, #FF6A88, #FF99AC);
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+        
+        .game-title {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .game-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-bottom: 2px dashed #FF99AC;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #FF6A88;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .game-area {
+            position: relative;
+            height: 400px;
+            background: linear-gradient(to bottom, #a1c4fd, #c2e9fb);
+            overflow: hidden;
+        }
+        
+        .bucket-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+        }
+        
+        .bucket {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .bucket:hover {
+            transform: scale(1.1);
+        }
+        
+        .bucket-top {
+            width: 100px;
+            height: 15px;
+            background-color: #795548;
+            border-radius: 10px 10px 0 0;
+            position: absolute;
+            top: -7px;
+            left: -10px;
+        }
+        
+        .bucket-body {
+            width: 80px;
+            height: 65px;
+            border-radius: 0 0 15px 15px;
+            position: absolute;
+            top: 8px;
+            box-shadow: inset 0 -10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .falling-shape {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.1s;
+        }
+        
+        .instructions {
+            padding: 20px;
+            text-align: center;
+            background-color: #f8f9fa;
+        }
+        
+        .instructions h3 {
+            color: #FF6A88;
+            margin-bottom: 10px;
+        }
+        
+        .game-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        #startBtn {
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: white;
+        }
+        
+        #resetBtn {
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+        }
+        
+        .splash {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: splash 0.6s ease-out;
+        }
+        
+        @keyframes splash {
+            0% {
+                transform: scale(0);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+        
+        .combo-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            font-weight: bold;
+            color: #FF6A88;
+            text-shadow: 2px 2px 0 white;
+            animation: comboPop 1s ease-out;
+            pointer-events: none;
+        }
+        
+        @keyframes comboPop {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0;
+            }
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 100;
+            display: none;
+        }
+        
+        .game-over h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #FF9A8B;
+        }
+        
+        .game-over p {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">Color Splash!</h1>
+            <p class="game-subtitle">Click the matching color buckets to catch the shapes!</p>
+        </div>
+        
+        <div class="stats-container">
+            <div class="stat">
+                <div class="stat-value" id="score">0</div>
+                <div class="stat-label">Score</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="combo">1x</div>
+                <div class="stat-label">Combo</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="lives">3</div>
+                <div class="stat-label">Lives</div>
+            </div>
+        </div>
+        
+        <div class="game-area" id="gameArea">
+            <div class="bucket-container">
+                <div class="bucket" data-color="red">
+                    <div class="bucket-top"></div>
+                    <div class="bucket-body" style="background-color: #FF5252;"></div>
+                </div>
+                <div class="bucket" data-color="blue">
+                    <div class="bucket-top"></div>
+                    <div class="bucket-body" style="background-color: #448AFF;"></div>
+                </div>
+                <div class="bucket" data-color="green">
+                    <div class="bucket-top"></div>
+                    <div class="bucket-body" style="background-color: #69F0AE;"></div>
+                </div>
+                <div class="bucket" data-color="yellow">
+                    <div class="bucket-top"></div>
+                    <div class="bucket-body" style="background-color: #FFEB3B;"></div>
+                </div>
+            </div>
+            
+            <div class="game-over" id="gameOver">
+                <h2>Game Over!</h2>
+                <p>Your score: <span id="finalScore">0</span></p>
+                <button id="playAgainBtn">Play Again</button>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>How to Play</h3>
+            <p>Click the bucket that matches the color of the falling shapes!</p>
+            <p>Build combos by catching shapes in a row. Don't let them hit the ground!</p>
+        </div>
+        
+        <div class="game-buttons">
+            <button id="startBtn">Start Game</button>
+            <button id="resetBtn">Reset Game</button>
+        </div>
+    </div>
+
+    <script>
+        // Game variables
+        let score = 0;
+        let combo = 1;
+        let lives = 3;
+        let gameActive = false;
+        let fallingShapes = [];
+        let shapeInterval;
+        let gameSpeed = 2;
+        let spawnRate = 1200;
+        
+        // Game elements
+        const gameArea = document.getElementById('gameArea');
+        const scoreDisplay = document.getElementById('score');
+        const comboDisplay = document.getElementById('combo');
+        const livesDisplay = document.getElementById('lives');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const gameOverScreen = document.getElementById('gameOver');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        
+        // Colors and shapes
+        const colors = [
+            { name: 'red', value: '#FF5252' },
+            { name: 'blue', value: '#448AFF' },
+            { name: 'green', value: '#69F0AE' },
+            { name: 'yellow', value: '#FFEB3B' }
+        ];
+        
+        const shapes = ['●', '★', '■', '▲'];
+        
+        // Get bucket positions for spawning
+        function getBucketPositions() {
+            const buckets = document.querySelectorAll('.bucket');
+            const positions = [];
+            
+            buckets.forEach(bucket => {
+                const rect = bucket.getBoundingClientRect();
+                const gameAreaRect = gameArea.getBoundingClientRect();
+                
+                positions.push({
+                    color: bucket.dataset.color,
+                    left: rect.left - gameAreaRect.left + (rect.width / 2) - 25, // Center the shape above bucket
+                    bucketElement: bucket
+                });
+            });
+            
+            return positions;
+        }
+        
+        // Initialize game
+        function initGame() {
+            score = 0;
+            combo = 1;
+            lives = 3;
+            gameSpeed = 2;
+            spawnRate = 1200;
+            fallingShapes = [];
+            
+            updateDisplay();
+            gameOverScreen.style.display = 'none';
+            
+            // Clear existing shapes
+            document.querySelectorAll('.falling-shape').forEach(shape => shape.remove());
+            document.querySelectorAll('.splash').forEach(splash => splash.remove());
+            
+            if (shapeInterval) {
+                clearInterval(shapeInterval);
+            }
+            
+            gameActive = true;
+            
+            // Start creating shapes
+            shapeInterval = setInterval(createFallingShape, spawnRate);
+            
+            // Start game loop
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Create a falling shape directly above a bucket
+        function createFallingShape() {
+            if (!gameActive) return;
+            
+            const bucketPositions = getBucketPositions();
+            
+            // Pick a random bucket to spawn above
+            const randomBucket = bucketPositions[Math.floor(Math.random() * bucketPositions.length)];
+            const color = colors.find(c => c.name === randomBucket.color);
+            const shapeSymbol = shapes[Math.floor(Math.random() * shapes.length)];
+            
+            const shape = document.createElement('div');
+            shape.className = 'falling-shape';
+            shape.style.backgroundColor = color.value;
+            shape.style.left = randomBucket.left + 'px';
+            shape.style.top = '-60px';
+            shape.textContent = shapeSymbol;
+            shape.dataset.color = color.name;
+            
+            gameArea.appendChild(shape);
+            
+            fallingShapes.push({
+                element: shape,
+                y: -60,
+                color: color.name,
+                speed: gameSpeed,
+                targetBucket: randomBucket.color
+            });
+        }
+        
+        // Main game loop
+        function gameLoop() {
+            if (!gameActive) return;
+            
+            // Update all falling shapes
+            for (let i = fallingShapes.length - 1; i >= 0; i--) {
+                const shape = fallingShapes[i];
+                shape.y += shape.speed;
+                shape.element.style.top = shape.y + 'px';
+                
+                // Check if shape reached bottom
+                if (shape.y > gameArea.offsetHeight - 120) {
+                    // Shape missed - remove it
+                    shape.element.remove();
+                    fallingShapes.splice(i, 1);
+                    
+                    // Reset combo and lose life
+                    combo = 1;
+                    lives--;
+                    updateDisplay();
+                    
+                    // Check for game over
+                    if (lives <= 0) {
+                        endGame();
+                        return;
+                    }
+                }
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Handle bucket clicks
+        document.querySelectorAll('.bucket').forEach(bucket => {
+            bucket.addEventListener('click', function() {
+                if (!gameActive) return;
+                
+                const bucketColor = this.dataset.color;
+                let caughtShape = false;
+                
+                // Check for matching shapes near the bottom
+                for (let i = fallingShapes.length - 1; i >= 0; i--) {
+                    const shape = fallingShapes[i];
+                    
+                    if (shape.y > gameArea.offsetHeight - 180 && shape.color === bucketColor) {
+                        // Create splash effect
+                        createSplash(shape.element.style.left, shape.element.style.top, shape.color);
+                        
+                        // Remove shape
+                        shape.element.remove();
+                        fallingShapes.splice(i, 1);
+                        
+                        // Update score and combo
+                        score += 10 * combo;
+                        combo++;
+                        updateDisplay();
+                        
+                        // Show combo for high values
+                        if (combo >= 3) {
+                            showCombo();
+                        }
+                        
+                        caughtShape = true;
+                        break;
+                    }
+                }
+                
+                // Reset combo if wrong bucket clicked
+                if (!caughtShape && combo > 1) {
+                    combo = 1;
+                    updateDisplay();
+                }
+            });
+        });
+        
+        // Create splash effect
+        function createSplash(left, top, color) {
+            const splash = document.createElement('div');
+            splash.className = 'splash';
+            splash.style.left = left;
+            splash.style.top = top;
+            splash.style.backgroundColor = getColorValue(color);
+            gameArea.appendChild(splash);
+            
+            setTimeout(() => {
+                splash.remove();
+            }, 600);
+        }
+        
+        // Show combo text
+        function showCombo() {
+            const comboText = document.createElement('div');
+            comboText.className = 'combo-display';
+            comboText.textContent = combo + 'x COMBO!';
+            gameArea.appendChild(comboText);
+            
+            setTimeout(() => {
+                comboText.remove();
+            }, 1000);
+        }
+        
+        // Get color value by name
+        function getColorValue(colorName) {
+            const color = colors.find(c => c.name === colorName);
+            return color ? color.value : '#FFFFFF';
+        }
+        
+        // Update display
+        function updateDisplay() {
+            scoreDisplay.textContent = score;
+            comboDisplay.textContent = combo + 'x';
+            livesDisplay.textContent = lives;
+        }
+        
+        // End game
+        function endGame() {
+            gameActive = false;
+            clearInterval(shapeInterval);
+            finalScoreDisplay.textContent = score;
+            gameOverScreen.style.display = 'flex';
+        }
+        
+        // Event listeners
+        startBtn.addEventListener('click', initGame);
+        resetBtn.addEventListener('click', initGame);
+        playAgainBtn.addEventListener('click', initGame);
+        
+        // Initialize display
+        updateDisplay();
+    </script>
+</body>
+</html>
