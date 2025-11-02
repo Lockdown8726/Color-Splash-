@@ -78,6 +78,43 @@
             overflow: hidden;
         }
         
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            z-index: 10;
+        }
+        
+        .start-screen h2 {
+            font-size: 3rem;
+            color: #FF6A88;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 0 white;
+        }
+        
+        .start-screen button {
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+        
+        .start-screen button:hover {
+            transform: scale(1.1);
+        }
+        
         .bucket-container {
             position: absolute;
             bottom: 0;
@@ -132,50 +169,6 @@
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             transition: transform 0.1s;
-        }
-        
-        .instructions {
-            padding: 20px;
-            text-align: center;
-            background-color: #f8f9fa;
-        }
-        
-        .instructions h3 {
-            color: #FF6A88;
-            margin-bottom: 10px;
-        }
-        
-        .game-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            padding: 20px;
-            background-color: #f8f9fa;
-        }
-        
-        button {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        
-        #startBtn {
-            background: linear-gradient(to right, #4facfe, #00f2fe);
-            color: white;
-        }
-        
-        #resetBtn {
-            background: linear-gradient(to right, #ff9a9e, #fad0c4);
-            color: white;
-        }
-        
-        button:hover {
-            transform: translateY(-3px);
         }
         
         .splash {
@@ -252,6 +245,23 @@
             font-size: 1.5rem;
             margin-bottom: 30px;
         }
+        
+        .game-over button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: white;
+        }
+        
+        .game-over button:hover {
+            transform: translateY(-3px);
+        }
     </style>
 </head>
 <body>
@@ -277,6 +287,11 @@
         </div>
         
         <div class="game-area" id="gameArea">
+            <div class="start-screen" id="startScreen">
+                <h2>Color Splash!</h2>
+                <button id="centerStartBtn">Start Game</button>
+            </div>
+            
             <div class="bucket-container">
                 <div class="bucket" data-color="red">
                     <div class="bucket-top"></div>
@@ -302,17 +317,6 @@
                 <button id="playAgainBtn">Play Again</button>
             </div>
         </div>
-        
-        <div class="instructions">
-            <h3>How to Play</h3>
-            <p>Click the bucket that matches the color of the falling shapes!</p>
-            <p>Build combos by catching shapes in a row. Don't let them hit the ground!</p>
-        </div>
-        
-        <div class="game-buttons">
-            <button id="startBtn">Start Game</button>
-            <button id="resetBtn">Reset Game</button>
-        </div>
     </div>
 
     <script>
@@ -325,17 +329,19 @@
         let shapeInterval;
         let gameSpeed = 2;
         let spawnRate = 1200;
+        let level = 1;
+        let scoreThreshold = 100; // Score needed to level up
         
         // Game elements
         const gameArea = document.getElementById('gameArea');
         const scoreDisplay = document.getElementById('score');
         const comboDisplay = document.getElementById('combo');
         const livesDisplay = document.getElementById('lives');
-        const startBtn = document.getElementById('startBtn');
-        const resetBtn = document.getElementById('resetBtn');
         const gameOverScreen = document.getElementById('gameOver');
         const finalScoreDisplay = document.getElementById('finalScore');
         const playAgainBtn = document.getElementById('playAgainBtn');
+        const startScreen = document.getElementById('startScreen');
+        const centerStartBtn = document.getElementById('centerStartBtn');
         
         // Colors and shapes
         const colors = [
@@ -374,9 +380,12 @@
             gameSpeed = 2;
             spawnRate = 1200;
             fallingShapes = [];
+            level = 1;
+            scoreThreshold = 100;
             
             updateDisplay();
             gameOverScreen.style.display = 'none';
+            startScreen.style.display = 'none';
             
             // Clear existing shapes
             document.querySelectorAll('.falling-shape').forEach(shape => shape.remove());
@@ -454,7 +463,40 @@
                 }
             }
             
+            // Check for level up
+            checkLevelUp();
+            
             requestAnimationFrame(gameLoop);
+        }
+        
+        // Check if player has reached score threshold for next level
+        function checkLevelUp() {
+            if (score >= scoreThreshold) {
+                levelUp();
+            }
+        }
+        
+        // Increase difficulty level (silently)
+        function levelUp() {
+            level++;
+            
+            // Increase game speed
+            gameSpeed += 0.5;
+            
+            // Decrease spawn rate (shapes appear more frequently)
+            spawnRate = Math.max(300, spawnRate - 150);
+            
+            // Update existing shapes' speed
+            fallingShapes.forEach(shape => {
+                shape.speed = gameSpeed;
+            });
+            
+            // Clear and restart shape interval with new spawn rate
+            clearInterval(shapeInterval);
+            shapeInterval = setInterval(createFallingShape, spawnRate);
+            
+            // Set next score threshold
+            scoreThreshold += level * 100;
         }
         
         // Handle bucket clicks
@@ -548,9 +590,8 @@
         }
         
         // Event listeners
-        startBtn.addEventListener('click', initGame);
-        resetBtn.addEventListener('click', initGame);
         playAgainBtn.addEventListener('click', initGame);
+        centerStartBtn.addEventListener('click', initGame);
         
         // Initialize display
         updateDisplay();
