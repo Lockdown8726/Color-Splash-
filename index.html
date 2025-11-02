@@ -16,9 +16,15 @@
             background: linear-gradient(135deg, #6e8efb, #a777e3);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
+        }
+        
+        .ad-container {
+            margin-bottom: 20px;
+            text-align: center;
         }
         
         .game-container {
@@ -263,8 +269,24 @@
             transform: translateY(-3px);
         }
     </style>
+    
+    <!-- Banner Ads Script -->
+    <script type="text/javascript">
+        atOptions = {
+            'key' : '2716b45279cff42ab24f8d835f56e3d6',
+            'format' : 'iframe',
+            'height' : 50,
+            'width' : 320,
+            'params' : {}
+        };
+    </script>
+    <script type="text/javascript" src="//www.highperformanceformat.com/2716b45279cff42ab24f8d835f56e3d6/invoke.js"></script>
 </head>
 <body>
+    <div class="ad-container">
+        <!-- Banner ad will appear here -->
+    </div>
+    
     <div class="game-container">
         <div class="game-header">
             <h1 class="game-title">Color Splash!</h1>
